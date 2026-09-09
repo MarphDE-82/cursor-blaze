@@ -1,0 +1,17 @@
+# Enable exactly one of these cursor-trail shaders (Ghostty supports one custom-shader at a time
+# unless you list multiple; the last custom-shader line wins if you don't comment out the others).
+# Original shaders from https://github.com/stephin-develops/linux-ricing/tree/main/ghostty
+
+# Minty green/blue parallelogram trail
+# custom-shader = shaders/ghostty-slasher.glsl
+
+# Neon pink -> blue -> teal gradient parallelogram trail
+custom-shader = shaders/perfection.glsl
+
+# Hexagonal trail using the terminal's actual cursor color
+# custom-shader = shaders/cursor.glsl
+
+# Colorless/blur-only trail variant
+# custom-shader = shaders/blur-slasher.glsl
+
+custom-shader-animation = always
