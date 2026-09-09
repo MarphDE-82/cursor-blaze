@@ -70,6 +70,21 @@ reimplement each effect's SDF geometry, vertex selection, easing curve and color
 logic against those kitty types rather than reusing kitty's own built-in blaze
 shader, so the look matches the Ghostty originals rather than kitty's own style.
 
+## Other terminals
+
+**Alacritty**: no native shader support. The third-party [CRTty](https://github.com/kosa12/CRTty)
+(`LD_PRELOAD`) can run generic post-processing GLSL on Alacritty (CRT, scanlines,
+vignette, bloom), but it only exposes time/resolution to the shader — no cursor
+position — so it can't drive a cursor trail. These effects need real cursor-position
+data every frame, which nothing currently plumbs into Alacritty's renderer.
+
+**KDE Konsole**: no shader path at all, native or third-party. Konsole doesn't render
+through a GLSL fragment-shader pipeline the way kitty/Ghostty/Alacritty do (it's
+Qt/QPainter-based), and no known project bridges that gap. The closest thing KDE has
+is [kwin-effect-shaders](https://github.com/kevinlekiller/kwin-effect-shaders) at the
+*compositor* level — but that applies to the whole desktop, not a specific terminal
+window, and has no concept of "where's the terminal cursor" either.
+
 ## Credits
 
 Original Ghostty shaders by [stephin-develops](https://github.com/stephin-develops)
