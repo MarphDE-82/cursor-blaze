@@ -30,9 +30,12 @@ look in both terminals instead of settling for kitty's differently-styled built-
 
 ## Install
 
-Run `./install.sh` — it copies the Ghostty shaders into `~/.config/ghostty/shaders/`
-and the kitty shaders into `~/.config/kitty/shaders/`. It does **not** touch your
-existing config files; add one of the lines below yourself.
+Run `./install.sh` — it detects which of Ghostty / kitty you actually have installed
+(and, for kitty, whether that build actually supports `custom_shaders` — kitty-git
+builds don't bump their version string, so it checks kitty's own option schema at
+runtime rather than trusting `kitty --version`) and only installs shaders for those.
+Pure `mkdir`/`cp`, no package manager calls, so it runs on any Linux distro. It does
+**not** touch your existing config files; add one of the lines below yourself.
 
 ### Ghostty
 
