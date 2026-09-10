@@ -22,6 +22,16 @@ SOFTWARE.
 
 ---
 
-The GLSL shaders under ghostty/shaders/ are adapted from
+The following files are unmodified originals from
 https://github.com/stephin-develops/linux-ricing (no license specified upstream;
-included here with attribution per the README).
+included here with attribution per the README, not covered by the copyright above):
+
+    ghostty/shaders/blur-slasher.glsl
+    ghostty/shaders/cursor.glsl
+    ghostty/shaders/ghostty-slasher.glsl
+    ghostty/shaders/perfection.glsl
+
+Everything else in this repository — including the kitty Slang ports of the
+above effects, the spark-trail/cursor-trail-spark variant (an original effect,
+not a Ghostty port), and all supporting scripts/config/docs — is original work
+covered by the MIT copyright above.
