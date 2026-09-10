@@ -105,7 +105,7 @@ and color ages from white-yellow to ember orange-red as it fades.
 Original Ghostty shaders (perfection/ghostty-slasher/cursor) by [stephin-develops](https://github.com/stephin-develops)
 ([linux-ricing](https://github.com/stephin-develops/linux-ricing/tree/main/ghostty),
 u/IntellegientTrash2669 on Reddit). Spark variant, kitty ports, and this repo by
-[MarphDE](https://github.com/snafus-io).
+[MarphDE](https://github.com/MarphDE-82).
 
 ## License
 
