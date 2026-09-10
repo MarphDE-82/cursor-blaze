@@ -68,17 +68,14 @@ fragment_main(float4 color, KittyTextures t, KittyCustomShaderData d) {
 
     float2 curSize = float2(d.cursor_trail_edge.y - d.cursor_trail_edge.x,
                              d.cursor_trail_edge.z - d.cursor_trail_edge.w) * pixelDims;
-    float2 curPos = float2(d.cursor_trail_edge.x, d.cursor_trail_edge.z) * pixelDims; // top-left, y-down convention below
+    float2 curPos = float2(d.cursor_trail_edge.x, d.cursor_trail_edge.z) * pixelDims; // top-left, y-up (UV) convention
     float2 prevSize = float2(d.cursor_trail_prev_edge.y - d.cursor_trail_prev_edge.x,
                               d.cursor_trail_prev_edge.z - d.cursor_trail_prev_edge.w) * pixelDims;
     float2 prevPos = float2(d.cursor_trail_prev_edge.x, d.cursor_trail_prev_edge.z) * pixelDims;
 
-    // Re-express as (x, y=top, size) with y increasing downward like the original shader,
-    // by flipping around the viewport height once here so the rest of the math matches 1:1.
-    curPos.y = pixelDims.y - curPos.y;
-    prevPos.y = pixelDims.y - prevPos.y;
-    float2 pxFlipped = float2(px.x, pixelDims.y - px.y);
-
+    // cursor_trail_edge is already in the same y-up, origin-bottom-left convention
+    // the original shader's iCurrentCursor uses — no axis flip needed; subtracting
+    // size.y below moves down towards the bottom, matching the original 1:1.
     float2 centerCC = float2(curPos.x + curSize.x * 0.5, curPos.y - curSize.y * 0.5);
     float2 centerCP = float2(prevPos.x + prevSize.x * 0.5, prevPos.y - prevSize.y * 0.5);
 
@@ -92,8 +89,8 @@ fragment_main(float4 color, KittyTextures t, KittyCustomShaderData d) {
     float2 v2 = float2(curPos.x + curSize.x * ivf, curPos.y);
     float2 v3 = centerCP;
 
-    float sdfCursor = sdRect(pxFlipped, curPos + float2(curSize.x * 0.5, -curSize.y * 0.5), curSize * 0.5);
-    float sdfTrail = sdParallelogram(pxFlipped, v0, v1, v2, v3);
+    float sdfCursor = sdRect(px, curPos + float2(curSize.x * 0.5, -curSize.y * 0.5), curSize * 0.5);
+    float sdfTrail = sdParallelogram(px, v0, v1, v2, v3);
 
     float progress = clamp((d.timestamp - d.cursor_trail_change_time) / DURATION, 0.0, 1.0);
     float easedProgress = ease(progress);

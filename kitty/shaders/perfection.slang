@@ -80,10 +80,10 @@ fragment_main(float4 color, KittyTextures t, KittyCustomShaderData d) {
                               d.cursor_trail_prev_edge.z - d.cursor_trail_prev_edge.w) * pixelDims;
     float2 prevPos = float2(d.cursor_trail_prev_edge.x, d.cursor_trail_prev_edge.z) * pixelDims;
 
-    curPos.y = pixelDims.y - curPos.y;
-    prevPos.y = pixelDims.y - prevPos.y;
-    float2 pxFlipped = float2(px.x, pixelDims.y - px.y);
-
+    // cursor_trail_edge uses UV (origin bottom-left, y up) — same convention as
+    // Ghostty's iCurrentCursor, so no axis flip is needed here. .z is the top
+    // edge; subtracting size.y below moves down towards the bottom, matching
+    // the original's math exactly.
     float2 centerCC = float2(curPos.x + curSize.x * 0.5, curPos.y - curSize.y * 0.5);
     float2 centerCP = float2(prevPos.x + prevSize.x * 0.5, prevPos.y - prevSize.y * 0.5);
 
@@ -102,14 +102,14 @@ fragment_main(float4 color, KittyTextures t, KittyCustomShaderData d) {
     float tGrad = 1.0;
     if (lineDistSq > 0.0001) {
         float2 dir = centerCC - centerCP;
-        float2 w = pxFlipped - centerCP;
+        float2 w = px - centerCP;
         tGrad = clamp(dot(w, dir) / lineDistSq, 0.0, 1.0);
     }
     float4 dynTrail = gradientColor(tGrad);
     float4 dynAccent = lerp(dynTrail, float4(1.0), 0.5);
 
-    float sdfCursor = sdRect(pxFlipped, curPos + float2(curSize.x * 0.5, -curSize.y * 0.5), curSize * 0.5);
-    float sdfTrail = sdParallelogram(pxFlipped, v0, v1, v2, v3);
+    float sdfCursor = sdRect(px, curPos + float2(curSize.x * 0.5, -curSize.y * 0.5), curSize * 0.5);
+    float sdfTrail = sdParallelogram(px, v0, v1, v2, v3);
 
     float progress = clamp((d.timestamp - d.cursor_trail_change_time) / DURATION, 0.0, 1.0);
     float easedProgress = ease(progress);

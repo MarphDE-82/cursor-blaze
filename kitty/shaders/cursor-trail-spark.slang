@@ -44,14 +44,15 @@ fragment_main(float4 color, KittyTextures t, KittyCustomShaderData d) {
 
     float2 pixelDims = float2(d.viewport_size_pixels) * t.viewport.zw;
     float2 px = t.pos * pixelDims;
-    float2 pxFlipped = float2(px.x, pixelDims.y - px.y);
 
+    // cursor_trail_edge is UV (origin bottom-left, y up) — keep that convention
+    // throughout, no axis flip; subtracting size.y below moves towards the bottom.
     float2 curSize = float2(d.cursor_trail_edge.y - d.cursor_trail_edge.x,
                              d.cursor_trail_edge.z - d.cursor_trail_edge.w) * pixelDims;
-    float2 curPos = float2(d.cursor_trail_edge.x * pixelDims.x, pixelDims.y - d.cursor_trail_edge.z * pixelDims.y);
+    float2 curPos = float2(d.cursor_trail_edge.x, d.cursor_trail_edge.z) * pixelDims;
     float2 prevSize = float2(d.cursor_trail_prev_edge.y - d.cursor_trail_prev_edge.x,
                               d.cursor_trail_prev_edge.z - d.cursor_trail_prev_edge.w) * pixelDims;
-    float2 prevPos = float2(d.cursor_trail_prev_edge.x * pixelDims.x, pixelDims.y - d.cursor_trail_prev_edge.z * pixelDims.y);
+    float2 prevPos = float2(d.cursor_trail_prev_edge.x, d.cursor_trail_prev_edge.z) * pixelDims;
 
     float2 currentCenter = float2(curPos.x + curSize.x * 0.5, curPos.y - curSize.y * 0.5);
     float2 previousCenter = float2(prevPos.x + prevSize.x * 0.5, prevPos.y - prevSize.y * 0.5);
@@ -93,7 +94,7 @@ fragment_main(float4 color, KittyTextures t, KittyCustomShaderData d) {
         float streakLen = lerp(4.0, 16.0, speedNorm) * fade;
         float flicker = 0.75 + 0.25 * sin(d.timestamp * 40.0 + seed * 17.0);
 
-        float2 rel = pxFlipped - sparkPos;
+        float2 rel = px - sparkPos;
         float along = dot(rel, tangent);
         float across = dot(rel, normal);
 
@@ -112,7 +113,7 @@ fragment_main(float4 color, KittyTextures t, KittyCustomShaderData d) {
     result.rgb = clamp(result.rgb + accumColor * INTENSITY, float3(0.0, 0.0, 0.0), float3(1.0, 1.0, 1.0));
 
     float2 halfSize = curSize * 0.5;
-    float2 dd = abs(pxFlipped - currentCenter) - halfSize;
+    float2 dd = abs(px - currentCenter) - halfSize;
     float sdfCursor = length(max(dd, float2(0.0))) + min(max(dd.x, dd.y), 0.0);
     result.rgb = lerp(result.rgb, color.rgb, step(sdfCursor, 0.0));
 

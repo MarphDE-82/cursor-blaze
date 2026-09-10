@@ -84,12 +84,13 @@ fragment_main(float4 color, KittyTextures t, KittyCustomShaderData d) {
     float aaWidth = scale;
     float2 normOffset = pixelDims * invResY;
 
-    // Same y-down/top-left rect convention as the mint/neon ports, for consistency
-    // with the original algorithm's expectations.
-    float2 curPosPx = float2(d.cursor_trail_edge.x, pixelDims.y - d.cursor_trail_edge.z) * float2(pixelDims.x, 1.0);
+    // cursor_trail_edge is UV (origin bottom-left, y up), same convention as the
+    // original algorithm's top-left-corner-minus-height math expects — no axis
+    // flip, and both components must be scaled by pixelDims (not just x).
+    float2 curPosPx = float2(d.cursor_trail_edge.x, d.cursor_trail_edge.z) * pixelDims;
     float2 curSizePx = float2(d.cursor_trail_edge.y - d.cursor_trail_edge.x,
                                d.cursor_trail_edge.z - d.cursor_trail_edge.w) * pixelDims;
-    float2 prevPosPx = float2(d.cursor_trail_prev_edge.x, pixelDims.y - d.cursor_trail_prev_edge.z) * float2(pixelDims.x, 1.0);
+    float2 prevPosPx = float2(d.cursor_trail_prev_edge.x, d.cursor_trail_prev_edge.z) * pixelDims;
     float2 prevSizePx = float2(d.cursor_trail_prev_edge.y - d.cursor_trail_prev_edge.x,
                                 d.cursor_trail_prev_edge.z - d.cursor_trail_prev_edge.w) * pixelDims;
 
@@ -117,8 +118,7 @@ fragment_main(float4 color, KittyTextures t, KittyCustomShaderData d) {
     float2 trailP3 = lerp(prevP3, currP3, easedProgressDouble);
 
     float2 px = t.pos * pixelDims;
-    float2 pxFlipped = float2(px.x, pixelDims.y - px.y);
-    float2 normCoord = pxFlipped * scale - normOffset;
+    float2 normCoord = px * scale - normOffset;
 
     float sdfHex = sdHexagon(normCoord, trailP1, trailP2, currP2, currP4, currP3, trailP3);
     float alpha = 1.0 - smoothstep(-aaWidth, aaWidth, sdfHex);
