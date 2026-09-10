@@ -3,13 +3,16 @@
 // conventions of the other shaders in this repo (iCurrentCursor/iPreviousCursor/
 // iTime/iTimeCursorChange/iFocus).
 //
-// Fragment shaders have no persistent state, so there's no real particle buffer —
-// each of NUM_SPARKS "sparks" is instead reconstructed analytically every frame
-// from its index and the time since the cursor last moved: a pseudo-random seed
-// picks its spawn point along the previous->current cursor line, its outward
-// launch angle/speed, its size, and a small per-spark start delay so they don't
-// all pop and fade in lockstep. A slight downward "gravity" term bends each
-// spark's path into a small falling arc as it flies out and fades.
+// Each spark is reconstructed analytically every frame from its index and the
+// time since the cursor last moved (fragment shaders have no persistent state,
+// so there's no real particle buffer): a pseudo-random seed picks its spawn
+// point along the previous->current cursor line, launch angle/speed, size and
+// a small birth delay so they don't all pop/fade in lockstep. Gravity bends
+// each spark's path into a falling arc. Each spark is rendered as a small hot
+// core plus a longer glow streaked along its *instantaneous* velocity
+// direction (so the streak itself bends through the arc, not just a straight
+// line) — that streak plus a hot-core/cold-tail three-stop color ramp and a
+// fast flicker is what sells "flying ember" instead of a soft floating dot.
 
 vec2 getRectangleCenter(in vec4 rectangle) {
     return vec2(rectangle.x + (rectangle.z / 2.0), rectangle.y - (rectangle.w / 2.0));
@@ -19,16 +22,29 @@ float hash(float n) {
     return fract(sin(n) * 43758.5453123);
 }
 
-const int NUM_SPARKS = 14;
-const float DURATION = 0.6;
-const float GRAVITY = 60.0;
-const float MIN_SPEED = 25.0;
-const float MAX_SPEED = 110.0;
-const float MIN_SIZE = 1.4;
-const float MAX_SIZE = 3.6;
+const int NUM_SPARKS = 16;
+const float DURATION = 0.65;
+const float GRAVITY = 70.0;
+const float MIN_SPEED = 40.0;
+const float MAX_SPEED = 140.0;
+const float MIN_SIZE = 0.9;
+const float MAX_SIZE = 2.0;
 const float MAX_DELAY_FRAC = 0.35; // fraction of DURATION a spark's birth can be staggered by
-const vec3 COLOR_HOT = vec3(1.0, 0.95, 0.72);   // white-yellow, freshly launched
-const vec3 COLOR_COLD = vec3(1.0, 0.22, 0.04);  // ember orange-red, about to die
+const float CORE_BRIGHTNESS = 3.0;
+const float STREAK_BRIGHTNESS = 1.1;
+const float INTENSITY = 1.35; // overall punch before clamping to LDR
+
+vec3 emberColor(float t) {
+    // white-hot -> yellow -> orange -> dark red as the spark ages (t: 0..1)
+    vec3 c1 = vec3(1.0, 0.98, 0.92);
+    vec3 c2 = vec3(1.0, 0.80, 0.25);
+    vec3 c3 = vec3(1.0, 0.35, 0.05);
+    vec3 c4 = vec3(0.35, 0.04, 0.01);
+    vec3 col = mix(c1, c2, smoothstep(0.0, 0.28, t));
+    col = mix(col, c3, smoothstep(0.28, 0.62, t));
+    col = mix(col, c4, smoothstep(0.62, 1.0, t));
+    return col;
+}
 
 void mainImage(out vec4 fragColor, in vec2 fragCoord) {
     fragColor = texture(iChannel0, fragCoord.xy / iResolution.xy);
@@ -58,35 +74,53 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord) {
         float r2 = hash(seed + 0.71);
         float r3 = hash(seed + 1.13);
         float r4 = hash(seed + 1.53);
+        float r5 = hash(seed + 2.02);
 
-        // When this spark is born, relative to the overall trail age.
         float delay = r4 * MAX_DELAY_FRAC;
         float localAge = (age - delay) / max(1.0 - delay, 0.001);
         if (localAge <= 0.0 || localAge >= 1.0) {
             continue;
         }
 
-        // Spawn point: somewhere along the path the cursor just travelled.
         vec2 basePos = mix(previousCenter, currentCenter, r0);
 
-        // Outward scatter in a random direction, with a falling arc over its life.
         float angle = r1 * 6.2831853;
         float speed = mix(MIN_SPEED, MAX_SPEED, r2);
-        vec2 dir = vec2(cos(angle), sin(angle));
-        vec2 offset = dir * speed * localAge;
-        offset.y -= GRAVITY * localAge * localAge;
+        vec2 launchDir = vec2(cos(angle), sin(angle));
 
-        vec2 sparkPos = basePos + offset;
-        float size = mix(MIN_SIZE, MAX_SIZE, r3) * (1.0 - localAge);
+        // Position and instantaneous velocity (derivative of position wrt localAge)
+        // under constant launch velocity plus downward gravity — this makes the
+        // streak orientation itself curve through the falling arc.
+        vec2 sparkPos = basePos + launchDir * speed * localAge + vec2(0.0, -GRAVITY * localAge * localAge);
+        vec2 velocity = launchDir * speed + vec2(0.0, -2.0 * GRAVITY * localAge);
+        float velLen = max(length(velocity), 0.001);
+        vec2 tangent = velocity / velLen;
+        vec2 normal = vec2(-tangent.y, tangent.x);
 
-        float dist = length(px - sparkPos);
-        float glow = exp(-(dist * dist) / (2.0 * size * size)) * (1.0 - localAge);
+        float fade = (1.0 - localAge);
+        float size = mix(MIN_SIZE, MAX_SIZE, r3) * fade;
+        float speedNorm = (speed - MIN_SPEED) / max(MAX_SPEED - MIN_SPEED, 0.001);
+        float streakLen = mix(4.0, 16.0, speedNorm) * fade;
+        float flicker = 0.75 + 0.25 * sin(iTime * 40.0 + seed * 17.0);
 
-        vec3 sparkColor = mix(COLOR_HOT, COLOR_COLD, localAge);
-        accumColor += sparkColor * glow;
+        vec2 rel = px - sparkPos;
+        float along = dot(rel, tangent);
+        float across = dot(rel, normal);
+
+        // Streak: stretched behind the direction of travel, tight ahead of it.
+        float alongNorm = along < 0.0 ? (-along / streakLen) : (along / (size * 1.5));
+        float acrossNorm = across / size;
+        float streak = exp(-(alongNorm * alongNorm + acrossNorm * acrossNorm));
+
+        // Small bright core exactly at the spark's current position.
+        float core = exp(-(along * along + across * across) / (size * size));
+
+        float glow = (core * CORE_BRIGHTNESS + streak * STREAK_BRIGHTNESS) * fade * flicker;
+        vec3 sparkColor = emberColor(localAge);
+        accumColor += sparkColor * glow * (0.6 + 0.4 * r5);
     }
 
-    fragColor.rgb = clamp(fragColor.rgb + accumColor, 0.0, 1.0);
+    fragColor.rgb = clamp(fragColor.rgb + accumColor * INTENSITY, 0.0, 1.0);
 
     // Don't draw sparks over the cursor block itself.
     vec2 halfSize = iCurrentCursor.zw * 0.5;
