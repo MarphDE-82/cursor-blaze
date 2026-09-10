@@ -102,10 +102,10 @@ and color ages from white-yellow to ember orange-red as it fades.
 
 ## Credits
 
-Original Ghostty shaders (neon/mint/hexagon) by [stephin-develops](https://github.com/stephin-develops)
+Original Ghostty shaders (perfection/ghostty-slasher/cursor) by [stephin-develops](https://github.com/stephin-develops)
 ([linux-ricing](https://github.com/stephin-develops/linux-ricing/tree/main/ghostty),
 u/IntellegientTrash2669 on Reddit). Spark variant, kitty ports, and this repo by
-[snafus-io](https://github.com/snafus-io).
+[MarphDE](https://github.com/snafus-io).
 
 ## License
 
