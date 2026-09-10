@@ -5,6 +5,11 @@
 
 cursor_trail 1
 
+# kitty defaults to ignoring single-cell cursor moves (threshold 2), so normal
+# typing would not trigger the trail. The Ghostty originals animate on every
+# cursor move, including typing single characters — set this to 0 to match:
+cursor_trail_start_threshold 0
+
 # Minty green/blue parallelogram trail
 # custom_shaders ghostty-slasher
 

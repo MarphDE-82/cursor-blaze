@@ -58,11 +58,17 @@ from `master`).
 ```
 # ~/.config/kitty/kitty.conf
 cursor_trail 1
+cursor_trail_start_threshold 0         # match Ghostty: animate on every move, incl. typing
 custom_shaders perfection              # neon gradient
 # custom_shaders ghostty-slasher       # mint
 # custom_shaders cursor                # hexagon
 # custom_shaders cursor-trail-spark    # ember/spark burst
 ```
+
+kitty defaults `cursor_trail_start_threshold` to `2` cells, meaning it skips the
+trail for single-cell moves like normal typing — only larger cursor jumps trigger
+it. The Ghostty originals have no such threshold; they animate on every cursor
+move. Set it to `0` to get the same behavior in kitty.
 
 ## How the kitty port works
 
