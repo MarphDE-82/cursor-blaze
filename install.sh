@@ -56,6 +56,7 @@ Ghostty (~/.config/ghostty/config or $XDG_CONFIG_HOME/ghostty/config), pick one:
     custom-shader = shaders/ghostty-slasher.glsl   # minty
     custom-shader = shaders/perfection.glsl        # neon gradient
     custom-shader = shaders/cursor.glsl             # hexagon, dynamic cursor color
+    custom-shader = shaders/spark-trail.glsl        # ember/spark burst
     custom-shader-animation = always
 
 kitty (~/.config/kitty/kitty.conf or $XDG_CONFIG_HOME/kitty/kitty.conf):
@@ -63,4 +64,5 @@ kitty (~/.config/kitty/kitty.conf or $XDG_CONFIG_HOME/kitty/kitty.conf):
     custom_shaders cursor-trail-mint       # minty
     custom_shaders cursor-trail-neon       # neon gradient
     custom_shaders cursor-trail-hexagon    # hexagon, dynamic cursor color
+    custom_shaders cursor-trail-spark      # ember/spark burst
 EOF

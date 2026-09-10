@@ -1,9 +1,9 @@
 # cursor-blaze
 
 Animated cursor-trail shaders for your terminal — works in **both Ghostty and kitty**,
-with the exact same visuals in each. Three variants: a neon pink→blue→teal gradient
-trail, a minty parallelogram trail, and a hexagonal trail colored with your actual
-cursor color.
+with the exact same visuals in each. Four variants: a neon pink→blue→teal gradient
+trail, a minty parallelogram trail, a hexagonal trail colored with your actual cursor
+color, and a procedural ember/spark burst.
 
 <!-- Add a screenshot or GIF of the trail in action here -->
 
@@ -27,6 +27,7 @@ look in both terminals instead of settling for kitty's differently-styled built-
 | Neon gradient | `perfection` / `cursor-trail-neon` | Pink → blue → teal gradient trail |
 | Mint blaze | `ghostty-slasher` / `cursor-trail-mint` | Minty green/blue parallelogram trail |
 | Hexagon | `cursor` / `cursor-trail-hexagon` | Hexagonal trail using your actual cursor color |
+| Spark | `spark-trail` / `cursor-trail-spark` | Procedural ember/spark burst with a falling arc — original effect, not a Ghostty port |
 
 ## Install
 
@@ -44,6 +45,7 @@ Pure `mkdir`/`cp`, no package manager calls, so it runs on any Linux distro. It 
 custom-shader = shaders/perfection.glsl        # neon gradient
 # custom-shader = shaders/ghostty-slasher.glsl # mint
 # custom-shader = shaders/cursor.glsl          # hexagon
+# custom-shader = shaders/spark-trail.glsl     # ember/spark burst
 custom-shader-animation = always
 ```
 
@@ -59,6 +61,7 @@ cursor_trail 1
 custom_shaders cursor-trail-neon       # neon gradient
 # custom_shaders cursor-trail-mint     # mint
 # custom_shaders cursor-trail-hexagon  # hexagon
+# custom_shaders cursor-trail-spark    # ember/spark burst
 ```
 
 ## How the kitty port works
@@ -88,11 +91,21 @@ is [kwin-effect-shaders](https://github.com/kevinlekiller/kwin-effect-shaders) a
 *compositor* level — but that applies to the whole desktop, not a specific terminal
 window, and has no concept of "where's the terminal cursor" either.
 
+The spark variant (`spark-trail.glsl` / `cursor-trail-spark.slang`) is an original
+addition, not a Ghostty port — written for this repo. It reconstructs a burst of
+"sparks" analytically every frame (no persistent particle state is possible in a
+stateless fragment shader): each spark's spawn point along the cursor's travel path,
+launch angle/speed, size and birth delay come from a per-spark pseudo-random hash
+seeded by the time of the last cursor move, so every jump throws a differently
+shaped burst. A small downward "gravity" term bends each spark into a falling arc,
+and color ages from white-yellow to ember orange-red as it fades.
+
 ## Credits
 
-Original Ghostty shaders by [stephin-develops](https://github.com/stephin-develops)
+Original Ghostty shaders (neon/mint/hexagon) by [stephin-develops](https://github.com/stephin-develops)
 ([linux-ricing](https://github.com/stephin-develops/linux-ricing/tree/main/ghostty),
-u/IntellegientTrash2669 on Reddit). kitty ports and this repo by [snafus-io](https://github.com/snafus-io).
+u/IntellegientTrash2669 on Reddit). Spark variant, kitty ports, and this repo by
+[snafus-io](https://github.com/snafus-io).
 
 ## License
 
