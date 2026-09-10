@@ -61,8 +61,8 @@ Ghostty (~/.config/ghostty/config or $XDG_CONFIG_HOME/ghostty/config), pick one:
 
 kitty (~/.config/kitty/kitty.conf or $XDG_CONFIG_HOME/kitty/kitty.conf):
     cursor_trail 1
-    custom_shaders cursor-trail-mint       # minty
-    custom_shaders cursor-trail-neon       # neon gradient
-    custom_shaders cursor-trail-hexagon    # hexagon, dynamic cursor color
+    custom_shaders ghostty-slasher         # minty
+    custom_shaders perfection              # neon gradient
+    custom_shaders cursor                  # hexagon, dynamic cursor color
     custom_shaders cursor-trail-spark      # ember/spark burst
 EOF

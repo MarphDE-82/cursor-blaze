@@ -22,11 +22,11 @@ look in both terminals instead of settling for kitty's differently-styled built-
 
 ## Variants
 
-| Variant | Preview name | Effect |
+| Variant | Shader name | Effect |
 |---|---|---|
-| Neon gradient | `perfection` / `cursor-trail-neon` | Pink → blue → teal gradient trail |
-| Mint blaze | `ghostty-slasher` / `cursor-trail-mint` | Minty green/blue parallelogram trail |
-| Hexagon | `cursor` / `cursor-trail-hexagon` | Hexagonal trail using your actual cursor color |
+| Neon gradient | `perfection` | Pink → blue → teal gradient trail |
+| Mint blaze | `ghostty-slasher` | Minty green/blue parallelogram trail |
+| Hexagon | `cursor` | Hexagonal trail using your actual cursor color |
 | Spark | `spark-trail` / `cursor-trail-spark` | Procedural ember/spark burst with a falling arc — original effect, not a Ghostty port |
 
 ## Install
@@ -58,9 +58,9 @@ from `master`).
 ```
 # ~/.config/kitty/kitty.conf
 cursor_trail 1
-custom_shaders cursor-trail-neon       # neon gradient
-# custom_shaders cursor-trail-mint     # mint
-# custom_shaders cursor-trail-hexagon  # hexagon
+custom_shaders perfection              # neon gradient
+# custom_shaders ghostty-slasher       # mint
+# custom_shaders cursor                # hexagon
 # custom_shaders cursor-trail-spark    # ember/spark burst
 ```
 

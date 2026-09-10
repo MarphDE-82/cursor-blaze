@@ -1,7 +1,7 @@
 #language slang 2026
 // Kitty port of "perfection.glsl" (neon pink -> blue -> teal gradient cursor trail)
 // from https://github.com/stephin-develops/linux-ricing/tree/main/ghostty
-// Same parallelogram/SDF trail as cursor-trail-mint.slang, but the fill color is an
+// Same parallelogram/SDF trail as ghostty-slasher.slang, but the fill color is an
 // animated gradient based on how far along the trail (previous -> current cursor) a
 // pixel sits, matching the original's getGradientColor().
 
